@@ -9,6 +9,7 @@ from collections import deque
 import pygame
 from loguru import logger
 
+from states.menus.title import Title
 from utils import draw_text
 
 GAME_NAME = "Drop7 clone"
@@ -37,6 +38,13 @@ class Game:  # pylint: disable=R0902
         self.exit_requested = False
         self.paused = False
 
+        # states
+        self.state = None
+        self.states = {}
+        logger.info(f"Current state: {self.state}")
+        logger.info(f"State list: {self.states}")
+        self.load_states("Title")
+
         # timing
         self.delta_time = 0.0
         self.prev_time = 0.0
@@ -62,6 +70,7 @@ class Game:  # pylint: disable=R0902
 
         pygame.init()
         self.game_font = self.load_asset("font", "04B_30__.ttf", None, 30)
+        self.title_font = self.load_asset("font", "04B_30__.ttf", None, 50)
         self.tech_font = self.load_asset("font", "Zector.ttf", None, 20)
         pygame.display.set_caption(GAME_NAME)
 
@@ -91,6 +100,21 @@ class Game:  # pylint: disable=R0902
             (self.screen_width, self.screen_height), pygame.RESIZABLE
         )
 
+    def load_states(self, name):
+        """Load current state for the game"""
+        self.state = name
+
+        match self.state:
+            case "Title":
+                title_menu = Title(name, self)
+                title_menu.create_state()
+            case _:
+                logger.error(f"Unknown state: {self.state}")
+
+        self.state = name
+        logger.info(f"New state: {self.state}")
+        logger.info(f"State list: {self.states}")
+
     def get_events(self):
         """get events such as mouse activity and windows events"""
         for event in pygame.event.get():
@@ -102,19 +126,10 @@ class Game:  # pylint: disable=R0902
 
     def render(self):
         """Render Canvas"""
+        self.states[self.state].render()
         self.draw_fps()
 
         self.previous_game_canvas = self.game_canvas.copy()
-
-        draw_text(
-            self.game_canvas,
-            GAME_NAME,
-            "white",
-            self.game_w / 2,
-            self.game_h / 2,
-            self.game_font,
-            "center",
-        )
 
         self.screen.blit(
             pygame.transform.scale(self.game_canvas, (self.blit_w, self.blit_h)),
@@ -123,7 +138,7 @@ class Game:  # pylint: disable=R0902
         pygame.display.flip()
 
     def get_dt(self):
-        """ get time between frames """
+        """get time between frames"""
         now = time.time()
         self.delta_time = now - self.prev_time
         self.prev_time = now
@@ -132,7 +147,7 @@ class Game:  # pylint: disable=R0902
             self.fps.popleft()
 
     def draw_fps(self):
-        """ Draw Fps on screen """
+        """Draw Fps on screen"""
         if len(self.fps) == self.fps_depth:
             rect = pygame.Rect(0, 0, 50, 30)
             rect.topleft = (self.game_w - 55, self.game_h - 35)
