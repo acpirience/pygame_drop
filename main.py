@@ -3,6 +3,8 @@
 """
 import os
 import sys
+import time
+from collections import deque
 
 import pygame
 from loguru import logger
@@ -35,9 +37,17 @@ class Game:  # pylint: disable=R0902
         self.exit_requested = False
         self.paused = False
 
+        # timing
+        self.delta_time = 0.0
+        self.prev_time = 0.0
+        self.clock = pygame.time.Clock()
+        self.fps = deque()
+        self.fps_depth = 60
+
     def game_loop(self):
         """update and render game every frame"""
         while self.running:
+            self.get_dt()
             self.get_events()
             self.update()
             self.render()
@@ -52,6 +62,7 @@ class Game:  # pylint: disable=R0902
 
         pygame.init()
         self.game_font = self.load_asset("font", "04B_30__.ttf", None, 30)
+        self.tech_font = self.load_asset("font", "Zector.ttf", None, 20)
         pygame.display.set_caption(GAME_NAME)
 
     def init_screen(self):
@@ -91,6 +102,8 @@ class Game:  # pylint: disable=R0902
 
     def render(self):
         """Render Canvas"""
+        self.draw_fps()
+
         self.previous_game_canvas = self.game_canvas.copy()
 
         draw_text(
@@ -108,6 +121,32 @@ class Game:  # pylint: disable=R0902
             self.blit_origin,
         )
         pygame.display.flip()
+
+    def get_dt(self):
+        """ get time between frames """
+        now = time.time()
+        self.delta_time = now - self.prev_time
+        self.prev_time = now
+        self.fps.append(int(1 / self.delta_time))
+        if len(self.fps) > self.fps_depth:
+            self.fps.popleft()
+
+    def draw_fps(self):
+        """ Draw Fps on screen """
+        if len(self.fps) == self.fps_depth:
+            rect = pygame.Rect(0, 0, 50, 30)
+            rect.topleft = (self.game_w - 55, self.game_h - 35)
+            pygame.draw.rect(self.game_canvas, "black", rect)
+
+            draw_text(
+                self.game_canvas,
+                str(int(sum(self.fps) / self.fps_depth)),
+                "white",
+                self.game_w - 10,
+                self.game_h - 10,
+                self.tech_font,
+                "right",
+            )
 
     def load_asset(self, asset_type, asset_name, asset_folder=None, asset_option=None):
         """Load various type of assets"""
