@@ -1,10 +1,13 @@
 """
         Drop7 project
 """
+import os
 import sys
 
 import pygame
 from loguru import logger
+
+from utils import draw_text
 
 GAME_NAME = "Drop7 clone"
 GAME_W = 1280
@@ -42,7 +45,13 @@ class Game:  # pylint: disable=R0902
 
     def init_window(self):
         """Init pygame"""
+
+        # Create pointers to directories
+        self.assets_dir = os.path.join("assets")
+        self.font_dir = os.path.join(self.assets_dir, "fonts")
+
         pygame.init()
+        self.game_font = self.load_asset("font", "04B_30__.ttf", None, 30)
         pygame.display.set_caption(GAME_NAME)
 
     def init_screen(self):
@@ -84,11 +93,35 @@ class Game:  # pylint: disable=R0902
         """Render Canvas"""
         self.previous_game_canvas = self.game_canvas.copy()
 
+        draw_text(
+            self.game_canvas,
+            GAME_NAME,
+            "white",
+            self.game_w / 2,
+            self.game_h / 2,
+            self.game_font,
+            "center",
+        )
+
         self.screen.blit(
             pygame.transform.scale(self.game_canvas, (self.blit_w, self.blit_h)),
             self.blit_origin,
         )
         pygame.display.flip()
+
+    def load_asset(self, asset_type, asset_name, asset_folder=None, asset_option=None):
+        """Load various type of assets"""
+        if asset_type in ["image", "font", "sound"]:
+            logger.info(
+                f"Loading {asset_type} asset: {asset_folder if asset_folder else ''}{'/' if asset_folder else ''}{asset_name} {asset_option if asset_option else ''}"
+            )
+        match asset_type:
+            case "font":
+                return pygame.font.Font(
+                    os.path.join(self.font_dir, asset_name), asset_option
+                )
+            case _:
+                logger.error(f"Unknown asset: {asset_type}")
 
 
 if __name__ == "__main__":
