@@ -206,6 +206,6 @@ cython_debug/
 #build files
 /clean.cmd
 /_build_drop.py
-/_build_drop.cmd
 /pylint.rc
 /drop7.png
+/build_drop.cmd
