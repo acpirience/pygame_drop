@@ -10,6 +10,7 @@ import pygame
 from loguru import logger
 
 from game_settings import DEBUG, GAME_H, GAME_NAME, GAME_W, SCREEN_HEIGHT, SCREEN_WIDTH
+from states.levels.level import Level
 from states.menus.title import Title
 from utils import draw_text
 
@@ -50,8 +51,8 @@ class Game:  # pylint: disable=R0902
         # mouse status
         self.mouse_x = 0
         self.mouse_y = 0
-        self.mouse_up = False
         self.mouse_down = False
+        self.mouse_clicked = False
 
     def game_loop(self):
         """update and render game every frame"""
@@ -109,6 +110,9 @@ class Game:  # pylint: disable=R0902
             case "Title":
                 title_menu = Title(name, self)
                 title_menu.create_state()
+            case "Level":
+                level = Level(name, self)
+                level.create_state()
             case _:
                 logger.error(f"Unknown state: {self.state}")
 
@@ -118,20 +122,20 @@ class Game:  # pylint: disable=R0902
 
     def get_events(self):
         """get events such as mouse activity and windows events"""
-        self.mouse_up, self.mouse_down = False, False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
 
-            if event.type == pygame.MOUSEBUTTONUP:
-                self.mouse_up = True
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                self.mouse_down = True
+            prev_mouse_down = self.mouse_down
+            self.mouse_down = pygame.mouse.get_pressed()[0]
+            if self.mouse_down != prev_mouse_down:
+                self.mouse_clicked = True
 
             self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
 
     def update(self):
         """Update canvas"""
+        self.states[self.state].update()
 
     def render(self):
         """Render Canvas"""
@@ -182,7 +186,7 @@ class Game:  # pylint: disable=R0902
 
         draw_text(
             self.game_canvas,
-            f"{self.mouse_x}-{self.mouse_y} {self.mouse_up} {self.mouse_down}",
+            f"{self.mouse_x}-{self.mouse_y} {self.mouse_down} {self.mouse_clicked}",
             "white",
             10,
             self.game_h - 10,

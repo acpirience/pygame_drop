@@ -1,6 +1,7 @@
 """ Home page and main menu of the game  """
 
 import pygame
+from loguru import logger
 
 from game_settings import GAME_NAME, MENU_BG, MENU_COLOUR, SELECT_COLOUR
 from states.state import State
@@ -14,11 +15,10 @@ class Title(State):
         """Init title"""
         super().__init__(name, game)
         self.menu_items = ["Play"]
-        self.selected_item = None
         self.menu_start_w = (self.game.game_w * 0.5) - 50
         self.menu_start_h = self.game.game_h * 0.4
         self.menu_offset = 80
-        self.active = None
+        self.menu_selected = None
 
     def draw_title(self):
         """Draw title on Home screen"""
@@ -33,11 +33,13 @@ class Title(State):
 
     def draw_menu(self):
         """draw main menu"""
+        self.menu_selected = None
         for i, item in enumerate(self.menu_items):
             menu_x = self.menu_start_w - 10
             menu_y = self.menu_start_h + i * self.menu_offset + 10.0
             text_width = self.game.game_font.size(item)[0]
             if self.mouse_in(menu_x, menu_y, text_width + 20, 55):
+                self.menu_selected = i
                 rect = pygame.Rect(0, 0, text_width + 20, 55)
                 draw_rect(
                     self.game.game_canvas,
@@ -65,8 +67,18 @@ class Title(State):
             and rect_y - height < self.game.mouse_y < rect_y
         )
 
-    def update(self, delta_time, actions):
+    def update(self):
         """Update statutes of screen"""
+        if self.game.mouse_clicked:
+            if (
+                self.menu_selected is not None
+                and self.menu_items[self.menu_selected] == "Play"
+            ):
+                logger.info("'Play' menu item play selected")
+                self.game.started = True
+                self.game.paused = False
+                self.game.load_states("Level")
+            self.game.mouse_clicked = False
 
     def render(self):
         """Render screen"""
