@@ -9,7 +9,7 @@ from collections import deque
 import pygame
 from loguru import logger
 
-from game_settings import GAME_H, GAME_NAME, GAME_W, SCREEN_HEIGHT, SCREEN_WIDTH
+from game_settings import DEBUG, GAME_H, GAME_NAME, GAME_W, SCREEN_HEIGHT, SCREEN_WIDTH
 from states.menus.title import Title
 from utils import draw_text
 
@@ -46,6 +46,12 @@ class Game:  # pylint: disable=R0902
         self.clock = pygame.time.Clock()
         self.fps = deque()
         self.fps_depth = 60
+
+        # mouse status
+        self.mouse_x = 0
+        self.mouse_y = 0
+        self.mouse_up = False
+        self.mouse_down = False
 
     def game_loop(self):
         """update and render game every frame"""
@@ -112,9 +118,17 @@ class Game:  # pylint: disable=R0902
 
     def get_events(self):
         """get events such as mouse activity and windows events"""
+        self.mouse_up, self.mouse_down = False, False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.mouse_up = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.mouse_down = True
+
+            self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
 
     def update(self):
         """Update canvas"""
@@ -123,6 +137,8 @@ class Game:  # pylint: disable=R0902
         """Render Canvas"""
         self.states[self.state].render()
         self.draw_fps()
+        if DEBUG:
+            self.draw_mouse()
 
         self.previous_game_canvas = self.game_canvas.copy()
 
@@ -157,6 +173,22 @@ class Game:  # pylint: disable=R0902
                 self.tech_font,
                 "right",
             )
+
+    def draw_mouse(self):
+        """Draw mouse states for debugging purpose"""
+        rect = pygame.Rect(0, 0, 200, 30)
+        rect.topleft = (0, self.game_h - 35)
+        pygame.draw.rect(self.game_canvas, "black", rect)
+
+        draw_text(
+            self.game_canvas,
+            f"{self.mouse_x}-{self.mouse_y} {self.mouse_up} {self.mouse_down}",
+            "white",
+            10,
+            self.game_h - 10,
+            self.tech_font,
+            "left",
+        )
 
     def load_asset(self, asset_type, asset_name, asset_folder=None, asset_option=None):
         """Load various type of assets"""
