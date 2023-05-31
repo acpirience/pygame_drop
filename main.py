@@ -1,5 +1,5 @@
 """
-        Drop7 project
+        DropX project
 """
 import os
 import sys
@@ -9,14 +9,9 @@ from collections import deque
 import pygame
 from loguru import logger
 
+from game_settings import GAME_H, GAME_NAME, GAME_W, SCREEN_HEIGHT, SCREEN_WIDTH
 from states.menus.title import Title
 from utils import draw_text
-
-GAME_NAME = "Drop7 clone"
-GAME_W = 1280
-GAME_H = 720
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
 
 
 class Game:  # pylint: disable=R0902

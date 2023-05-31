@@ -1,5 +1,6 @@
 """ Home page and main menu of the game  """
 
+from game_settings import GAME_NAME, MENU_BG, MENU_COLOUR
 from states.state import State
 from utils import draw_text
 
@@ -15,8 +16,8 @@ class Title(State):
         """Draw title on Home screen"""
         draw_text(
             self.game.game_canvas,
-            "Drop 7 Clone",
-            "white",
+            GAME_NAME,
+            MENU_COLOUR,
             (self.game.game_w / 2),
             (self.game.game_h / 6),
             self.game.title_font,
@@ -27,5 +28,5 @@ class Title(State):
 
     def render(self):
         """Render screen"""
-        self.game.game_canvas.fill("black")
+        self.game.game_canvas.fill(MENU_BG)
         self.draw_title()

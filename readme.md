@@ -1,6 +1,6 @@
-## A drop 7 clone
+## DropX
 
-
+A pygame drop type game
 Work in progress 😉
 
 
