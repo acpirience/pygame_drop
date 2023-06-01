@@ -20,7 +20,13 @@ class Level(State):
         super().__init__(name, game)
         self.margin_top = 128
         self.margin_left = 64
+        self.blocks = {"unknown": None}
         logger.info(f"Grid is {GRID_W}x{GRID_H}")
+        self.load_assets()
+
+    def load_assets(self):
+        for key in self.blocks:
+            self.blocks[key] = self.game.load_asset("image", f"block_{key}.png")
 
     def update(self):
         """Update level state"""
@@ -83,6 +89,11 @@ class Level(State):
             GRID_HIGHLIGHT,
         )
 
+    def draw_block(self, grid_x, grid_y, block):
+        pos_x = self.margin_left + grid_x * (GRID_STEP + 1) + 1
+        pos_y = self.margin_top + grid_y * (GRID_STEP + 1) + 1
+        self.game.game_canvas.blit(self.blocks[block], (pos_x, pos_y))
+
     def render(self):
         """Render level"""
         self.game.game_canvas.fill(LEVEL_BG)
@@ -90,3 +101,6 @@ class Level(State):
         if selected_col is not None:
             self.draw_highlight(selected_col)
         self.draw_grid()
+        for x in range(GRID_W):
+            for y in range(GRID_H):
+                self.draw_block(x, y, "unknown")

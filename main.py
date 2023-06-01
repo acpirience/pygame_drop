@@ -69,6 +69,7 @@ class Game:  # pylint: disable=R0902
         # Create pointers to directories
         self.assets_dir = os.path.join("assets")
         self.font_dir = os.path.join(self.assets_dir, "fonts")
+        self.image_dir = os.path.join(self.assets_dir, "image")
 
         pygame.init()
         self.game_font = self.load_asset("font", "04B_30__.ttf", None, 30)
@@ -205,6 +206,8 @@ class Game:  # pylint: disable=R0902
                 return pygame.font.Font(
                     os.path.join(self.font_dir, asset_name), asset_option
                 )
+            case "image":
+                return pygame.image.load(os.path.join(self.image_dir, asset_name))
             case _:
                 logger.error(f"Unknown asset: {asset_type}")
 
