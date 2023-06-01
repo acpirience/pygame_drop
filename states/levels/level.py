@@ -1,8 +1,17 @@
 """ level gameplay """
 import pygame
+from loguru import logger
 
-from game_settings import GRID_COLOR, GRID_H, GRID_STEP, GRID_W, LEVEL_BG
+from game_settings import (
+    GRID_COLOR,
+    GRID_H,
+    GRID_HIGHLIGHT,
+    GRID_STEP,
+    GRID_W,
+    LEVEL_BG,
+)
 from states.state import State
+from utils import draw_rect
 
 
 class Level(State):
@@ -11,9 +20,30 @@ class Level(State):
         super().__init__(name, game)
         self.margin_top = 128
         self.margin_left = 64
+        logger.info(f"Grid is {GRID_W}x{GRID_H}")
 
     def update(self):
         """Update level state"""
+
+    def mouse_on_column(self):
+        if (
+            self.game.mouse_y < self.margin_top
+            or self.game.mouse_y > self.margin_top + GRID_H * GRID_STEP + 7
+        ):
+            return None
+        if (
+            self.game.mouse_x < self.margin_left
+            or self.game.mouse_x > self.margin_left + GRID_W * GRID_STEP + 7
+        ):
+            return None
+
+        for i in range(GRID_W):
+            if (
+                self.margin_left + i * (GRID_STEP + 1)
+                < self.game.mouse_x
+                < self.margin_left + (i + 1) * (GRID_STEP + 1)
+            ):
+                return i
 
     def draw_grid(self):
         """draw the grid where the tile are placed"""
@@ -24,7 +54,7 @@ class Level(State):
                 (self.margin_left + i * (GRID_STEP + 1), self.margin_top),
                 (
                     self.margin_left + i * (GRID_STEP + 1),
-                    self.margin_top + 7 * GRID_STEP + 7,
+                    self.margin_top + GRID_H * GRID_STEP + GRID_H,
                 ),
             )
         for i in range(GRID_H + 1):
@@ -33,12 +63,30 @@ class Level(State):
                 GRID_COLOR,
                 (self.margin_left, self.margin_top + i * (GRID_STEP + 1)),
                 (
-                    self.margin_left + 7 * GRID_STEP + 7,
+                    self.margin_left + GRID_W * GRID_STEP + GRID_W,
                     self.margin_top + i * (GRID_STEP + 1),
                 ),
             )
 
+    def draw_highlight(self, col):
+        rect = pygame.Rect(
+            0,
+            0,
+            GRID_STEP + 2,
+            GRID_H * GRID_STEP + GRID_H,
+        )
+        draw_rect(
+            self.game.game_canvas,
+            rect,
+            self.margin_left + col * (GRID_STEP + 1),
+            self.margin_top + GRID_H * GRID_STEP + GRID_H,
+            GRID_HIGHLIGHT,
+        )
+
     def render(self):
         """Render level"""
         self.game.game_canvas.fill(LEVEL_BG)
+        selected_col = self.mouse_on_column()
+        if selected_col is not None:
+            self.draw_highlight(selected_col)
         self.draw_grid()
