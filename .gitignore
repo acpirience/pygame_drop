@@ -209,3 +209,4 @@ cython_debug/
 /pylint.rc
 /drop7.png
 /build_drop.cmd
+*.info

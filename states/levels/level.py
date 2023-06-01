@@ -9,6 +9,7 @@ from game_settings import (
     GRID_STEP,
     GRID_W,
     LEVEL_BG,
+    NB_BLOCKS,
 )
 from states.state import State
 from utils import draw_rect
@@ -21,6 +22,8 @@ class Level(State):
         self.margin_top = 128
         self.margin_left = 64
         self.blocks = {"unknown": None}
+        for i in range(NB_BLOCKS):
+            self.blocks[f"{i+1}"] = None
         logger.info(f"Grid is {GRID_W}x{GRID_H}")
         self.load_assets()
 
@@ -96,11 +99,16 @@ class Level(State):
 
     def render(self):
         """Render level"""
+        block = 0
         self.game.game_canvas.fill(LEVEL_BG)
         selected_col = self.mouse_on_column()
         if selected_col is not None:
             self.draw_highlight(selected_col)
         self.draw_grid()
-        for x in range(GRID_W):
-            for y in range(GRID_H):
-                self.draw_block(x, y, "unknown")
+        for y in range(GRID_H):
+            for x in range(GRID_W):
+                if block % len(self.blocks) == 0:
+                    self.draw_block(x, y, "unknown")
+                else:
+                    self.draw_block(x, y, f"{block % len(self.blocks)}")
+                block += 1
