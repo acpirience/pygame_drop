@@ -36,7 +36,7 @@ class Level(State):
 
     def mouse_on_column(self):
         if (
-            self.game.mouse_y < self.margin_top
+            self.game.mouse_y < self.margin_top - 30
             or self.game.mouse_y > self.margin_top + GRID_H * GRID_STEP + 7
         ):
             return None
@@ -82,7 +82,7 @@ class Level(State):
             0,
             0,
             GRID_STEP + 2,
-            GRID_H * GRID_STEP + GRID_H,
+            GRID_H * GRID_STEP + GRID_H + 30,
         )
         draw_rect(
             self.game.game_canvas,
@@ -90,6 +90,7 @@ class Level(State):
             self.margin_left + col * (GRID_STEP + 1),
             self.margin_top + GRID_H * GRID_STEP + GRID_H,
             GRID_HIGHLIGHT,
+            10,
         )
 
     def draw_block(self, grid_x, grid_y, block):
