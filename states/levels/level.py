@@ -1,4 +1,6 @@
 """ level gameplay """
+from random import randrange
+
 import pygame
 from loguru import logger
 
@@ -9,6 +11,8 @@ from game_settings import (
     GRID_STEP,
     GRID_W,
     LEVEL_BG,
+    MAX_START_BLOCK,
+    MIN_START_BLOCK,
     NB_BLOCKS,
 )
 from states.state import State
@@ -21,11 +25,13 @@ class Level(State):
         super().__init__(name, game)
         self.margin_top = 128
         self.margin_left = 64
-        self.blocks = {"unknown": None}
+        self.blocks = {0: None}
         for i in range(NB_BLOCKS):
-            self.blocks[f"{i+1}"] = None
+            self.blocks[i + 1] = None
         logger.info(f"Grid is {GRID_W}x{GRID_H}")
+        self.grid_content = [[None for _ in range(GRID_H)] for _ in range(GRID_W)]
         self.next_block = None
+        self.init_grid()
         self.load_assets()
 
     def load_assets(self):
@@ -34,6 +40,20 @@ class Level(State):
 
     def update(self):
         """Update level state"""
+
+    def init_grid(self):
+        """init grid"""
+        nb = randrange(MIN_START_BLOCK, MAX_START_BLOCK)
+        for _ in range(nb):
+            col = randrange(GRID_W)
+            block = randrange(NB_BLOCKS)
+            self.drop_block(col, block)
+
+    def drop_block(self, col, block):
+        for y in reversed(range(GRID_H)):
+            if self.grid_content[col][y] is None:
+                self.grid_content[col][y] = block
+                break
 
     def mouse_on_column(self):
         if (
@@ -101,8 +121,7 @@ class Level(State):
 
     def render(self):
         """Render level"""
-        block = 0
-        self.next_block = "6"
+        self.next_block = 6
         self.game.game_canvas.fill(LEVEL_BG)
         selected_col = self.mouse_on_column()
         if selected_col is not None:
@@ -112,8 +131,5 @@ class Level(State):
         self.draw_grid()
         for y in range(GRID_H):
             for x in range(GRID_W):
-                if block % len(self.blocks) == 0:
-                    self.draw_block(x, y, "unknown")
-                else:
-                    self.draw_block(x, y, f"{block % len(self.blocks)}")
-                block += 1
+                if self.grid_content[x][y] is not None:
+                    self.draw_block(x, y, self.grid_content[x][y])
