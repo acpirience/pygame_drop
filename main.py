@@ -54,6 +54,10 @@ class Game:  # pylint: disable=R0902
         self.mouse_down = False
         self.mouse_clicked = False
 
+        # sound
+        self.fx_volume = 100
+        self.sounds = {}
+
     def game_loop(self):
         """update and render game every frame"""
         while self.running:
@@ -70,6 +74,7 @@ class Game:  # pylint: disable=R0902
         self.assets_dir = os.path.join("assets")
         self.font_dir = os.path.join(self.assets_dir, "fonts")
         self.image_dir = os.path.join(self.assets_dir, "image")
+        self.sound_dir = os.path.join(self.assets_dir, "sounds")
 
         pygame.init()
         self.game_font = self.load_asset("font", "04B_30__.ttf", None, 30)
@@ -208,6 +213,10 @@ class Game:  # pylint: disable=R0902
                 )
             case "image":
                 return pygame.image.load(os.path.join(self.image_dir, asset_name))
+            case "sound":
+                sound = pygame.mixer.Sound(os.path.join(self.sound_dir, asset_name))
+                sound.set_volume(self.fx_volume / 100)
+                return sound
             case _:
                 logger.error(f"Unknown asset: {asset_type}")
 

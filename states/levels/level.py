@@ -42,6 +42,7 @@ class Level(State):
     def load_assets(self):
         for key in self.blocks:
             self.blocks[key] = self.game.load_asset("image", f"block_{key}.png")
+        self.game.sounds["block_land"] = self.game.load_asset("sound", "block_land.wav")
 
     def init_grid(self):
         """init grid"""
@@ -171,6 +172,7 @@ class Level(State):
                             self.grid_content[x][y].cur_height = 0
                             self.grid_content[x][y].target_height = 0
                             self.grid_content[x][y].animated = False
+                            pygame.mixer.Sound.play(self.game.sounds["block_land"])
 
     def render(self):
         """Render level"""
