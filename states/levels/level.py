@@ -25,6 +25,7 @@ class Level(State):
         for i in range(NB_BLOCKS):
             self.blocks[f"{i+1}"] = None
         logger.info(f"Grid is {GRID_W}x{GRID_H}")
+        self.next_block = None
         self.load_assets()
 
     def load_assets(self):
@@ -82,7 +83,7 @@ class Level(State):
             0,
             0,
             GRID_STEP + 2,
-            GRID_H * GRID_STEP + GRID_H + 30,
+            GRID_H * GRID_STEP + GRID_H + 10,
         )
         draw_rect(
             self.game.game_canvas,
@@ -101,10 +102,13 @@ class Level(State):
     def render(self):
         """Render level"""
         block = 0
+        self.next_block = "6"
         self.game.game_canvas.fill(LEVEL_BG)
         selected_col = self.mouse_on_column()
         if selected_col is not None:
             self.draw_highlight(selected_col)
+            if self.next_block is not None:
+                self.draw_block(selected_col, -1.25, self.next_block)
         self.draw_grid()
         for y in range(GRID_H):
             for x in range(GRID_W):
