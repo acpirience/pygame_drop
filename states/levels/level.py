@@ -35,6 +35,7 @@ class Level(State):
         self.grid_content = [[None for _ in range(GRID_H)] for _ in range(GRID_W)]
         self.next_block = None
         self.block_is_falling = False
+        self.analyse = False
         self.init_grid()
         self.init_animate_grid()
         self.load_assets()
@@ -47,15 +48,19 @@ class Level(State):
     def init_grid(self):
         """init grid"""
         nb = randrange(MIN_START_BLOCK, MAX_START_BLOCK)
-        for _ in range(nb):
-            col = randrange(GRID_W)
-            block = randrange(NB_BLOCKS)
-            self.drop_block(col, block)
 
-    def drop_block(self, col, block):
+        for i in range(nb + 4):  # first 4 block are ?
+            col = randrange(GRID_W)
+            if i < 4:
+                block = 0
+            else:
+                block = randrange(NB_BLOCKS)
+            self.drop_block(col, block, "INIT")
+
+    def drop_block(self, col, block, block_type):
         for y in reversed(range(GRID_H)):
             if self.grid_content[col][y] is None:
-                self.grid_content[col][y] = Block(block, False, False)
+                self.grid_content[col][y] = Block(block, block_type, False, False)
                 break
 
     def init_animate_grid(self):
@@ -102,6 +107,10 @@ class Level(State):
                 < self.margin_left + (i + 1) * (GRID_STEP + 1)
             ):
                 return i
+
+    def analyse_grid(self):
+        """compute lines and columns block activations"""
+        pass
 
     def draw_grid(self):
         """draw the grid where the tile are placed"""
@@ -173,12 +182,18 @@ class Level(State):
                             self.grid_content[x][y].target_height = 0
                             self.grid_content[x][y].animated = False
                             pygame.mixer.Sound.play(self.game.sounds["block_land"])
+                            if self.grid_content[x][y].block_type == "GAME":
+                                self.analyse = True
+
+        if self.analyse:
+            self.analyse_grid()
 
     def render(self):
         """Render level"""
-        self.next_block = None
-        if not self.block_is_falling:  # if no block is falling, show next block
-            self.next_block = Block(6, True, False)
+        if (
+            self.next_block is None and not self.block_is_falling
+        ):  # if no block is falling, show next block
+            self.next_block = Block(randrange(1, len(self.blocks)), "GAME", True, False)
         self.game.game_canvas.fill(LEVEL_BG)
         selected_col = self.mouse_on_column()
         if selected_col is not None:
